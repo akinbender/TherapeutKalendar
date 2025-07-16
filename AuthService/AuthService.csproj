@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
+    <PackageReference Include="Grpc.AspNetCore.Web" Version="2.71.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TherapeutKalendar.Shared\TherapeutKalendar.Shared.csproj" />
+    <ProjectReference Include="..\TherapeutKalendar.Shared.Protos\TherapeutKalendar.Shared.Protos.csproj" />
+    <ProjectReference Include="..\TherapeutKalendar.ServiceDefaults\TherapeutKalendar.ServiceDefaults.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Protobuf Include="..\TherapeutKalendar.Shared.Protos\Auth.proto" GrpcServices="Server" />
+  </ItemGroup>
+</Project>

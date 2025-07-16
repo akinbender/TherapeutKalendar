@@ -1,0 +1,69 @@
+﻿@page "/"
+@using TherapeutKalendar.Shared.Protos
+@using TherapeutKalendar.Shared.Enums
+@inject TherapeutKalendar.Shared.Protos.TherapistService.TherapistServiceClient TherapistClient
+
+<PageTitle>Home</PageTitle>
+
+<!-- Masthead-->
+<header class="masthead">
+    <div class="container position-relative">
+        <div class="row justify-content-center">
+            <div class="col-xl-6">
+                <div class="text-center text-white">
+                    <h1 class="mb-5">Finde einen Therapeuten!</h1>
+                    <div class="mb-3 d-flex flex-column flex-md-row gap-2 align-items-center justify-content-center">
+                        <input class="form-control form-control-lg" style="max-width: 300px;" @bind="searchName" placeholder="Therapeut Name suchen..." />
+                        <select class="form-select form-select-lg" style="max-width: 300px;" @bind="selectedSpecialty">
+                            <option value="">Spezialität wählen...</option>
+                            @foreach (var spec in Enum.GetValues<TherapistSpecialty>())
+                            {
+                                <option value="@spec">@spec</option>
+                            }
+                        </select>
+                        <button class="btn btn-primary mt-md-0 mt-2" @onclick="SearchTherapists">Suchen</button>
+                    </div>
+                    <div class="mt-4">
+                        <ul class="list-group">
+                            @if (therapists.Count == 0)
+                            {
+                                <li class="list-group-item text-muted">Keine Ergebnisse gefunden.</li>
+                            }
+                            else
+                            {
+                                @foreach (var therapist in therapists)
+                                {
+                                    <li class="list-group-item">
+                                        <strong>@therapist.FirstName @therapist.LastName</strong>
+                                        <span class="ms-2 badge bg-info">@therapist.Specialty</span>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+@code {
+    private string searchName = "";
+    private string selectedSpecialty = "";
+    private List<TherapistProto> therapists = new();
+
+    private async Task SearchTherapists()
+    {
+        therapists.Clear();
+        if (!string.IsNullOrWhiteSpace(searchName))
+        {
+            var response = await TherapistClient.SearchByNameAsync(new TherapistSearchByNameRequest { Name = searchName });
+            therapists = response.Therapists.ToList();
+        }
+        else if (!string.IsNullOrWhiteSpace(selectedSpecialty))
+        {
+            var response = await TherapistClient.SearchBySpecialtyAsync(new TherapistSearchBySpecialtyRequest { Specialty = selectedSpecialty });
+            therapists = response.Therapists.ToList();
+        }
+    }
+}

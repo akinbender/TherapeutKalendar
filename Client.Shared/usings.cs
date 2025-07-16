@@ -1,0 +1,10 @@
+﻿global using Microsoft.JSInterop;
+global using Client.Shared.Services;
+global using Client.Shared.Utils;
+global using static Client.Shared.Utils.Enums;
+global using Client.Shared.Properties;
+global using Client.Shared.Infrastructure;
+global using System.Globalization;
+global using System.ComponentModel.DataAnnotations;
+global using Microsoft.Extensions.Localization;
+global using System.Reflection;

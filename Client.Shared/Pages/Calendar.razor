@@ -1,0 +1,113 @@
+@page "/calendar"
+@using TherapeutKalendar.Shared.Protos
+@inject TherapeutKalendar.Shared.Protos.TerminService.TerminServiceClient TerminClient
+
+<h3>Wochenübersicht: Termine des Therapeuten</h3>
+
+<div class="mb-3">
+    <label for="therapistId" class="form-label">Therapeut-ID:</label>
+    <input id="therapistId" class="form-control" @bind="therapistId" placeholder="Therapeut-ID eingeben..." />
+    <button class="btn btn-primary mt-2" @onclick="LoadWeekTermins">Laden</button>
+</div>
+
+@if (weekTermins.Count > 0)
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Tag</th>
+                <th>Start</th>
+                <th>Ende</th>
+                <th>Status</th>
+                <th>Patient</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var day in weekDays)
+            {
+                var terminsForDay = weekTermins.Where(t => t.StartTime.Date == day.Date).OrderBy(t => t.StartTime);
+                <tr>
+                    <td>@day.ToString("dddd, dd.MM.")</td>
+                    <td colspan="4">
+                        @if (!terminsForDay.Any())
+                        {
+                            <span class="text-muted">Keine Termine</span>
+                        }
+                        else
+                        {
+                            <table class="table table-sm mb-0">
+                                @foreach (var termin in terminsForDay)
+                                {
+                                    <tr>
+                                        <td>@termin.StartTime.ToString("HH:mm")</td>
+                                        <td>@termin.EndTime.ToString("HH:mm")</td>
+                                        <td>@termin.Status</td>
+                                        <td>@termin.PatientName</td>
+                                    </tr>
+                                }
+                            </table>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (loaded)
+{
+    <div class="alert alert-info">Keine Termine für diese Woche gefunden.</div>
+}
+
+@code {
+    private string therapistId = "";
+    private List<DateTime> weekDays = new();
+    private List<CalendarTermin> weekTermins = new();
+    private bool loaded = false;
+
+    private async Task LoadWeekTermins()
+    {
+        loaded = false;
+        weekTermins.Clear();
+        weekDays = GetCurrentWeekDays();
+
+        if (Guid.TryParse(therapistId, out var tid))
+        {
+            var from = weekDays.First();
+            var to = weekDays.Last().AddDays(1).AddSeconds(-1);
+
+            var response = await TerminClient.GetAsync(new GetRequest
+            {
+                From = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTime(DateTime.SpecifyKind(from, DateTimeKind.Utc)),
+                To = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTime(DateTime.SpecifyKind(to, DateTimeKind.Utc))
+            });
+
+            weekTermins = response.Termins
+                //.Where(t => t.TherapistId == therapistId)
+                .Select(t => new CalendarTermin
+                {
+                    StartTime = t.StartTime.ToDateTime(),
+                    EndTime = t.EndTime.ToDateTime(),
+                    Status = t.Status,
+                    PatientName = t.PatientName
+                })
+                .ToList();
+        }
+        loaded = true;
+    }
+
+    private List<DateTime> GetCurrentWeekDays()
+    {
+        var today = DateTime.Today;
+        var startOfWeek = today.AddDays(-(int)today.DayOfWeek + (int)DayOfWeek.Monday);
+        return Enumerable.Range(0, 7).Select(i => startOfWeek.AddDays(i)).ToList();
+    }
+
+    private class CalendarTermin
+    {
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public string Status { get; set; } = "";
+        public string PatientName { get; set; } = "";
+    }
+}
+

@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "TherapeutKalendar.Shared.Protos";
+
+service TerminService {
+  rpc Get (GetRequest) returns (TerminResponse);
+  rpc Create (CreateRequest) returns (TerminProto);
+  rpc Update (UpdateRequest) returns (google.protobuf.Empty);
+}
+
+message GetRequest {
+  google.protobuf.Timestamp from = 1;
+  google.protobuf.Timestamp to = 2;
+}
+
+message CreateRequest {
+  google.protobuf.Timestamp start_time = 1;
+  string patient_id = 2;
+  string therapist_id = 3;
+}
+
+message UpdateRequest {
+  string id = 1;
+  string status = 2; // "Created", "Confirmed", "Canceled"
+}
+
+message TerminResponse {
+  repeated TerminProto termins = 1;
+}
+
+message TerminProto {
+  string id = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+  string status = 4;
+  string patient_name = 5;
+  string therapist_name = 6;
+}

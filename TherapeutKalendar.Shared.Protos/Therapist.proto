@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option csharp_namespace = "TherapeutKalendar.Shared.Protos";
+
+service TherapistService {
+  rpc SearchByName (TherapistSearchByNameRequest) returns (TherapistResponse);
+  rpc SearchBySpecialty (TherapistSearchBySpecialtyRequest) returns (TherapistResponse);
+}
+
+message TherapistSearchByNameRequest {
+  string name = 1;
+}
+
+message TherapistSearchBySpecialtyRequest {
+  string specialty = 1;
+}
+
+message TherapistResponse {
+  repeated TherapistProto therapists = 1;
+}
+
+message TherapistProto {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string specialty = 4;
+  string daily_start_hour = 5;
+  string daily_end_hour = 6;
+  string lunch_start = 7;
+  string lunch_end = 8;
+}
