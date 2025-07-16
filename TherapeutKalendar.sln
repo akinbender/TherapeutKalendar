@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TherapeutKalendar.Shared", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.Shared", "Client.Shared\Client.Shared.csproj", "{96E7CFB2-6696-444E-92CD-9113ED764B7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.WASM", "Client.Wasm\Client.WASM.csproj", "{FF572E51-95F6-4D21-B14A-CA82217C4465}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.WASM", "Client.WASM\Client.WASM.csproj", "{FF572E51-95F6-4D21-B14A-CA82217C4465}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client.MAUI", "Client.MAUI\Client.MAUI.csproj", "{4D1631AC-0073-414C-9399-D0D3E73602F3}"
 EndProject
