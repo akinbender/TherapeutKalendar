@@ -1,4 +1,4 @@
-name: Publish MAUI Apps
+name: Publish MAUI
 
 on:
   workflow-dispatch:

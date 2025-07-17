@@ -4,7 +4,13 @@ WORKDIR /src
 
 COPY Client.WASM/Client.WASM.csproj Client.WASM/
 COPY Client.WASM/ Client.WASM/
-COPY . .
+COPY Client.Shared/Client.Shared.csproj Client.Shared/
+COPY Client.Shared/ Client.Shared/
+COPY TherapeutKalendar.Shared/ TherapeutKalendar.Shared/
+COPY TherapeutKalendar.Shared.Protos/ TherapeutKalendar.Shared.Protos/
+COPY ["TherapeutKalendar.Shared/TherapeutKalendar.Shared.csproj", "TherapeutKalendar.Shared/"]
+COPY ["TherapeutKalendar.Shared.Protos/TherapeutKalendar.Shared.Protos.csproj", "TherapeutKalendar.Shared.Protos/"]
+
 RUN dotnet publish Client.WASM/Client.WASM.csproj -c Release -o /app
 
 # Serve stage
