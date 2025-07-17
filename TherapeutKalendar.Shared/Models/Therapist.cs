@@ -6,7 +6,7 @@ public class Therapist : Person
     public Therapist()
     {
     }
-    public Therapist(string firstName, string lastName) : base(firstName, lastName, true)
+    public Therapist(string firstName, string lastName) : base(firstName, lastName)
     {
         
     }

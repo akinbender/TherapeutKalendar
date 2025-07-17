@@ -4,12 +4,17 @@ WORKDIR /src
 
 # Copy project files
 COPY ["AuthService/AuthService.csproj", "AuthService/"]
+COPY ["TherapeutKalendar.Shared/TherapeutKalendar.Shared.csproj", "TherapeutKalendar.Shared/"]
 COPY ["TherapeutKalendar.Shared.Protos/TherapeutKalendar.Shared.Protos.csproj", "TherapeutKalendar.Shared.Protos/"]
+COPY ["TherapeutKalendar.ServiceDefaults/TherapeutKalendar.ServiceDefaults.csproj", "TherapeutKalendar.ServiceDefaults/"]
 
 # Restore dependencies
 RUN dotnet restore "AuthService/AuthService.csproj"
 
-COPY . .
+COPY AuthService/ AuthService/
+COPY TherapeutKalendar.Shared/ TherapeutKalendar.Shared/
+COPY TherapeutKalendar.Shared.Protos/ TherapeutKalendar.Shared.Protos/
+COPY TherapeutKalendar.ServiceDefaults/ TherapeutKalendar.ServiceDefaults/
 
 # Build
 RUN dotnet build "AuthService/AuthService.csproj" -c Release -o /app/build

@@ -1,16 +1,10 @@
-@page "/calendar"
+@page "/calendar/{TherapistId:guid}"
 @using TherapeutKalendar.Shared.Protos
 @inject TherapeutKalendar.Shared.Protos.TerminService.TerminServiceClient TerminClient
 
 <h3>Wochenübersicht: Termine des Therapeuten</h3>
 
-<div class="mb-3">
-    <label for="therapistId" class="form-label">Therapeut-ID:</label>
-    <input id="therapistId" class="form-control" @bind="therapistId" placeholder="Therapeut-ID eingeben..." />
-    <button class="btn btn-primary mt-2" @onclick="LoadWeekTermins">Laden</button>
-</div>
-
-@if (weekTermins.Count > 0)
+@if (availableTermins.Count > 0)
 {
     <table class="table table-bordered">
         <thead>
@@ -25,7 +19,7 @@
         <tbody>
             @foreach (var day in weekDays)
             {
-                var terminsForDay = weekTermins.Where(t => t.StartTime.Date == day.Date).OrderBy(t => t.StartTime);
+                var terminsForDay = availableTermins.Where(t => t.StartTime.ToDateTime().Date == day.Date).OrderBy(t => t.StartTime);
                 <tr>
                     <td>@day.ToString("dddd, dd.MM.")</td>
                     <td colspan="4">
@@ -39,8 +33,8 @@
                                 @foreach (var termin in terminsForDay)
                                 {
                                     <tr>
-                                        <td>@termin.StartTime.ToString("HH:mm")</td>
-                                        <td>@termin.EndTime.ToString("HH:mm")</td>
+                                        <td>@termin.StartTime.ToDateTime().ToString("HH:mm")</td>
+                                        <td>@termin.EndTime.ToDateTime().ToString("HH:mm")</td>
                                         <td>@termin.Status</td>
                                         <td>@termin.PatientName</td>
                                     </tr>
@@ -59,41 +53,9 @@ else if (loaded)
 }
 
 @code {
-    private string therapistId = "";
     private List<DateTime> weekDays = new();
     private List<CalendarTermin> weekTermins = new();
     private bool loaded = false;
-
-    private async Task LoadWeekTermins()
-    {
-        loaded = false;
-        weekTermins.Clear();
-        weekDays = GetCurrentWeekDays();
-
-        if (Guid.TryParse(therapistId, out var tid))
-        {
-            var from = weekDays.First();
-            var to = weekDays.Last().AddDays(1).AddSeconds(-1);
-
-            var response = await TerminClient.GetAsync(new GetRequest
-            {
-                From = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTime(DateTime.SpecifyKind(from, DateTimeKind.Utc)),
-                To = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTime(DateTime.SpecifyKind(to, DateTimeKind.Utc))
-            });
-
-            weekTermins = response.Termins
-                //.Where(t => t.TherapistId == therapistId)
-                .Select(t => new CalendarTermin
-                {
-                    StartTime = t.StartTime.ToDateTime(),
-                    EndTime = t.EndTime.ToDateTime(),
-                    Status = t.Status,
-                    PatientName = t.PatientName
-                })
-                .ToList();
-        }
-        loaded = true;
-    }
 
     private List<DateTime> GetCurrentWeekDays()
     {
@@ -108,6 +70,23 @@ else if (loaded)
         public DateTime EndTime { get; set; }
         public string Status { get; set; } = "";
         public string PatientName { get; set; } = "";
+    }
+
+    [Parameter]
+    public Guid TherapistId { get; set; }
+
+    private List<TerminProto> availableTermins = new();
+    protected override async Task OnParametersSetAsync()
+    {
+        // Fetch next available slots until end of this week
+        var today = DateTime.Today;
+        var endOfWeek = today.AddDays(7 - (int)today.DayOfWeek);
+        var response = await TerminClient.GetNextAvailableAsync(new NextAvailableRequest
+        {
+            TherapistId = TherapistId.ToString(),
+            Till = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTime(DateTime.SpecifyKind(endOfWeek, DateTimeKind.Utc))
+        });
+        availableTermins = response.Termins.ToList();
     }
 }
 

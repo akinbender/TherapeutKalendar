@@ -24,8 +24,4 @@ message TherapistProto {
   string first_name = 2;
   string last_name = 3;
   string specialty = 4;
-  string daily_start_hour = 5;
-  string daily_end_hour = 6;
-  string lunch_start = 7;
-  string lunch_end = 8;
 }

@@ -33,10 +33,7 @@ public class TherapistRepository : ITherapistRepository
     public async Task<IEnumerable<Therapist>> SearchByNameAsync(string name)
     {
         const string query = @"
-            SELECT id, first_name, last_name, 
-                   daily_start_hour, daily_end_hour, 
-                   lunch_start, lunch_end, 
-                   default_appointment_duration_minutes, specialty
+            SELECT id, first_name AS ""FirstName"", last_name AS ""LastName"", specialty
             FROM therapists
             WHERE first_name ILIKE @SearchPattern OR last_name ILIKE @SearchPattern";
 
@@ -47,10 +44,7 @@ public class TherapistRepository : ITherapistRepository
     public async Task<IEnumerable<Therapist>> SearchBySpecialtyAsync(TherapistSpecialty specialty)
     {
         const string query = @"
-            SELECT id, first_name, last_name, 
-                   daily_start_hour, daily_end_hour, 
-                   lunch_start, lunch_end, 
-                   default_appointment_duration_minutes, specialty
+            SELECT id, first_name AS ""FirstName"", last_name AS ""LastName"", specialty
             FROM therapists
             WHERE specialty = @Specialty";
 

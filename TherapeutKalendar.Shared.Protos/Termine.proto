@@ -7,6 +7,7 @@ option csharp_namespace = "TherapeutKalendar.Shared.Protos";
 
 service TerminService {
   rpc Get (GetRequest) returns (TerminResponse);
+  rpc GetNextAvailable (NextAvailableRequest) returns (TerminResponse); // NEW
   rpc Create (CreateRequest) returns (TerminProto);
   rpc Update (UpdateRequest) returns (google.protobuf.Empty);
 }
@@ -14,6 +15,11 @@ service TerminService {
 message GetRequest {
   google.protobuf.Timestamp from = 1;
   google.protobuf.Timestamp to = 2;
+}
+
+message NextAvailableRequest {
+  string therapist_id = 1;
+  google.protobuf.Timestamp till = 2;
 }
 
 message CreateRequest {

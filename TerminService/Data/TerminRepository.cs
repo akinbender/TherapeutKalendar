@@ -11,15 +11,22 @@ public class TerminRepository(NpgsqlConnection connection) : ITerminRepository
     public async Task<IEnumerable<Termin>> GetTermineAsync(DateTime start, DateTime end)
     {
         var query = @"
-            SELECT t.id, t.start_time, t.end_time, t.status,
-                   p.id, p.first_name, p.last_name, p.is_therapist,
-                   th.id, th.first_name, th.last_name, th.is_therapist
+            SELECT t.id, 
+                   t.start_time AS ""StartTime"", 
+                   t.end_time AS ""EndTime"", 
+                   t.status,
+                   p.id, 
+                   p.first_name AS ""FirstName"", 
+                   p.last_name AS ""LastName"",
+                   th.id, 
+                   th.first_name AS ""FirstName"", 
+                   th.last_name AS ""LastName""
             FROM termins t
-            JOIN persons p ON t.patient_id = p.id
-            JOIN persons th ON t.therapist_id = th.id
+            JOIN patients p ON t.patient_id = p.id
+            JOIN therapists th ON t.therapist_id = th.id
             WHERE t.start_time >= @Start AND t.end_time <= @End";
-        
-        return await _connection.QueryAsync<Termin, Person, Person, Termin>(
+
+        return await _connection.QueryAsync<Termin, Patient, Therapist, Termin>(
             query,
             (termin, patient, therapist) => 
             {
@@ -59,5 +66,36 @@ public class TerminRepository(NpgsqlConnection connection) : ITerminRepository
         
         var affected = await _connection.ExecuteAsync(query, new { Id = id, Status = status });
         return affected > 0;
+    }
+
+    public async Task<IEnumerable<Termin>> GetNextAvailableTerminsAsync(Guid therapistId, DateTime till)
+    {
+        var query = @"
+            SELECT t.id, 
+                   t.start_time AS ""StartTime"", 
+                   t.end_time AS ""EndTime"", 
+                   t.status,
+                   p.id, 
+                   p.first_name AS ""FirstName"", 
+                   p.last_name AS ""LastName"",
+                   th.id, 
+                   th.first_name AS ""FirstName"", 
+                   th.last_name AS ""LastName""
+            FROM termins t
+            JOIN patients p ON t.patient_id = p.id
+            JOIN therapists th ON t.therapist_id = th.id
+            WHERE t.therapist_id = @TherapistId
+              AND t.start_time > NOW()
+              AND t.start_time <= @Till
+            ORDER BY t.start_time";
+        return await _connection.QueryAsync<Termin, Patient, Therapist, Termin>(
+            query,
+            (termin, patient, therapist) => {
+                termin.Patient = patient;
+                termin.Therapist = therapist;
+                return termin;
+            },
+            new { TherapistId = therapistId, Till = till },
+            splitOn: "id,id");
     }
 }

@@ -21,6 +21,15 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddSingleton<ClientLoggingInterceptor>();
+        services.AddSingleton(services =>
+        {
+            var config = services.GetRequiredService<IAppConfigurationService>();
+            var httpHandler = new GrpcWebHandler(GrpcWebMode.GrpcWebText, new HttpClientHandler());
+            return GrpcChannel.ForAddress(config.Configuration.BackendUrl, new GrpcChannelOptions
+            {
+                HttpHandler = httpHandler
+            });
+        });
         services.AddGrpcClient<TerminService.TerminServiceClient>((provider, options) =>
         {
             var config = provider.GetRequiredService<IAppConfigurationService>();
@@ -31,10 +40,7 @@ public static class ServiceCollectionExtensions
         {
             var config = provider.GetRequiredService<IAppConfigurationService>();
             options.Address = new Uri(config.Configuration.BackendUrl);
-            services.AddScoped(_ => GrpcChannel.ForAddress(config.Configuration.BackendUrl, new GrpcChannelOptions
-            {
-                HttpHandler = new GrpcWebHandler(GrpcWebMode.GrpcWeb, new HttpClientHandler())
-            }));
+
         }).AddInterceptor<ClientLoggingInterceptor>();
 
         return services;

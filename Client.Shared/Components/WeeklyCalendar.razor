@@ -1,0 +1,41 @@
+@using TherapeutKalendar.Shared.Protos
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Uhrzeit</th>
+            @foreach (var day in WeekDays)
+            {
+                <th>@day.ToString("dddd")</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var timeSlot in TimeSlots)
+        {
+            <tr>
+                <td>@timeSlot.ToString(@"hh\:mm")</td>
+                @foreach (var day in WeekDays)
+                {
+                    var slot = Termins.FirstOrDefault(t =>
+                        t.StartTime.ToDateTime().Date == day.Date &&
+                        t.StartTime.ToDateTime().TimeOfDay == timeSlot);
+                    <td>
+                        @if (slot != null)
+                        {
+                            <span class="badge bg-success">Frei</span>
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter] public List<TerminProto> Termins { get; set; } = new();
+    [Parameter] public DateTime WeekStart { get; set; }
+
+    public List<DateTime> WeekDays => Enumerable.Range(0, 7).Select(i => WeekStart.AddDays(i)).ToList();
+    public List<TimeSpan> TimeSlots => Enumerable.Range(8, 10).Select(h => new TimeSpan(h, 0, 0)).ToList(); // 8:00-17:00
+}

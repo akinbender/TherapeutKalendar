@@ -1,0 +1,66 @@
+name: Publish MAUI Apps
+
+on:
+  push:
+    tags:
+    - 'v*'
+
+env:
+  MAUI_PROJECT: 'Client.MAUI/Client.MAUI.csproj'
+  OUTPUT_DIR: 'publish'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Install MAUI workloads
+      run: |
+        dotnet workload install maui
+        dotnet workload install maui-desktop
+        dotnet workload install maui-maccatalyst
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.MAUI_PROJECT }}
+
+    - name: Publish MAUI Windows
+      continue-on-error: true
+      run: dotnet publish ${{ env.MAUI_PROJECT }} -c Release -f net8.0-windows10.0.19041.0 -p:WindowsPackageType=None -o ${{ env.OUTPUT_DIR }}/windows
+
+    - name: Publish MAUI MacCatalyst
+      continue-on-error: true
+      run: dotnet publish ${{ env.MAUI_PROJECT }} -c Release -f net8.0-maccatalyst -p:CreatePackage=false
+
+    - name: Zip Windows Release
+      uses: vimtor/action-zip@v1.2
+      with:
+        files: ${{ env.OUTPUT_DIR }}/windows
+        dest: windows-release.zip
+
+    - name: Zip MacCatalyst Release
+      uses: vimtor/action-zip@v1.2
+      with:
+        files: Client.MAUI/bin/Release/net8.0-maccatalyst
+        dest: maccatalyst-release.zip
+
+    - name: Upload Windows Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-release
+        path: windows-release.zip
+
+    - name: Upload MacCatalyst Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: maccatalyst-release
+        path: maccatalyst-release.zip

@@ -33,9 +33,15 @@
                             {
                                 @foreach (var therapist in therapists)
                                 {
-                                    <li class="list-group-item">
-                                        <strong>@therapist.FirstName @therapist.LastName</strong>
-                                        <span class="ms-2 badge bg-info">@therapist.Specialty</span>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>
+                                            <strong>@therapist.FirstName @therapist.LastName</strong>
+                                            <span class="ms-2 badge bg-info">@therapist.Specialty</span>
+                                        </span>
+                                        <a class="btn btn-success btn-sm"
+                                           href="@($"/calendar/{therapist.Id}")">
+                                            Termin buchen
+                                        </a>
                                     </li>
                                 }
                             }

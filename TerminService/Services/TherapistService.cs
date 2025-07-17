@@ -21,6 +21,7 @@ public class TherapistService : TherapeutKalendar.Shared.Protos.TherapistService
     public override async Task<TherapistResponse> SearchByName(TherapistSearchByNameRequest request, ServerCallContext context)
     {
         var result = await _repository.SearchByNameAsync(request.Name);
+        _logger.LogInformation("SearchByName('{Name}') returned: {Therapists}", request.Name, string.Join(", ", result.Select(t => $"{t.FirstName} {t.LastName} ({t.Id})")));
         return new TherapistResponse { Therapists = { result.Select(ToProto) } };
     }
 
@@ -42,10 +43,6 @@ public class TherapistService : TherapeutKalendar.Shared.Protos.TherapistService
         Id = t.Id.ToString(),
         FirstName = t.FirstName,
         LastName = t.LastName,
-        Specialty = t.Specialty.ToString(),
-        DailyStartHour = t.DailyStartHour.ToString(),
-        DailyEndHour = t.DailyEndHour.ToString(),
-        LunchStart = t.LunchStart.ToString(),
-        LunchEnd = t.LunchEnd.ToString()
+        Specialty = t.Specialty.ToString()
     };
 }

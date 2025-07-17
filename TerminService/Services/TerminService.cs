@@ -54,6 +54,20 @@ public class TerminService(ITerminRepository repository, ILogger<TerminService> 
             throw new RpcException(new Status(StatusCode.NotFound, "Termin not found"));
     }
 
+    public override async Task<TerminResponse> GetNextAvailable(NextAvailableRequest request, ServerCallContext context)
+    {
+        if (!Guid.TryParse(request.TherapistId, out var therapistId))
+            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid therapist_id"));
+
+        var till = request.Till.ToDateTime();
+
+        var termins = await _repository.GetNextAvailableTerminsAsync(therapistId, till);
+
+        var response = new TerminResponse();
+        response.Termins.AddRange(termins.Select(ToGrpcTerminProto));
+        return response;
+    }
+
     private TerminProto ToGrpcTerminProto(Termin termin)
     {
         return new TerminProto

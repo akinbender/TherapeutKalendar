@@ -10,4 +10,5 @@ public interface ITerminRepository
     Task<IEnumerable<Termin>> GetTermineAsync(DateTime start, DateTime end);
     Task<Termin> CreateTerminAsync(Termin termin);
     Task<bool> UpdateTerminAsync(Guid id, string status);
+    Task<IEnumerable<Termin>> GetNextAvailableTerminsAsync(Guid therapistId, DateTime till);
 }
