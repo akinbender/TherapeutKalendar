@@ -1,7 +1,7 @@
 name: Publish MAUI
 
 on:
-  workflow-dispatch:
+  workflow_dispatch:
 
 env:
   MAUI_PROJECT: 'Client.MAUI/Client.MAUI.csproj'
